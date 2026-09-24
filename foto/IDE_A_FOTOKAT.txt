@@ -1,4 +1,4 @@
 Ide tedd a fotókat pontosan ezekkel a nevekkel (négyzetes kép a legjobb):
-  anya.jpg    – a nagy kör a koszorúban
+  anya.webp   – a nagy kör a koszorúban
   ivett.jpg, balazs.jpg, orsi.jpg, sebo.jpg – a "Sok szeretettel" rész körei
 Amíg nincs fotó, vicces helyőrző jelenik meg.
