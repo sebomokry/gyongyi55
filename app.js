@@ -292,11 +292,10 @@
   const agesJokes = [["25?", "Psszt… lélekben 25! 😉"], ["18!", "Na jó, 18 és pár hónap 😅"], ["∞", "Fiatalos energia: végtelen ⚡"], ["55.", "Oké, oké, 55. De milyen jól áll! ✨"]];
   let ageIdx = 0;
   n55.addEventListener("click", () => {
-    const [txt, msg] = agesJokes[ageIdx++ % agesJokes.length];
+    const [txt] = agesJokes[ageIdx++ % agesJokes.length];
     tempClass(n55, "flip", 800);
     sfx.slide(true);
     setTimeout(() => (n55.textContent = txt), 400);
-    toast(msg);
     if (txt !== "55.") setTimeout(() => { tempClass(n55, "flip", 800); setTimeout(() => (n55.textContent = "55."), 400); }, 2600);
     const [x, y] = centerOf(n55);
     burst(x, y, 30);
@@ -337,15 +336,12 @@
 
   /* ================= ANYA ================= */
   const mom = $("#mom");
-  const momBubble = $("#momBubble");
-  const accs = ["acc-hat", "acc-glasses", "acc-crown", "acc-stache", null];
-  const momLines = ["Buli-sapka ON! 🥳", "Túl menő vagyok ehhez 😎", "A család királynője 👑", "Bajusz? Miért ne! 🥸", "Na, vissza a régi énemhez 😄", "Ki mondta, hogy 55? 😏", "Hol a torta?! 🎂"];
+  const accs = ["acc-hat", "acc-glasses", "acc-crown", null];
   let accIdx = 0;
   mom.addEventListener("click", () => {
     $$(".acc > g", mom).forEach((g) => g.classList.remove("on"));
     const a = accs[accIdx % accs.length];
     if (a) $("." + a, mom).classList.add("on");
-    say(momBubble, accIdx < accs.length ? momLines[accIdx] : pick(momLines));
     accIdx++;
     tempClass(mom, "boing", 700);
     sfx.boing();
@@ -435,7 +431,6 @@
 
   /* ================= MENEKÜLŐ GOMB ================= */
   const whatGift = $("#whatGift");
-  const runLines = ["Hopp! Nem-nem! 🙈", "Majdnem! 😜", "Előbb a torta! 🎂", "Na jó… megadom magam 😅"];
   let runs = 0;
   const maxRuns = 3;
   function runAway() {
@@ -445,7 +440,6 @@
     const x = (Math.random() < 0.5 ? -1 : 1) * rand(80, Math.max(90, maxX));
     const y = rand(-40, 30);
     whatGift.style.transform = `translate(${x}px, ${y}px) rotate(${rand(-15, 15)}deg)`;
-    toast(runLines[runs]);
     sfx.slide(runs % 2 === 0);
     runs++;
     return true;
@@ -455,7 +449,6 @@
   whatGift.addEventListener("click", () => {
     if (runs < maxRuns && runAway()) return;
     whatGift.style.transform = "";
-    toast(runLines[3]);
     sfx.tada();
     const [x, y] = centerOf(whatGift);
     burst(x, y, 90, { speed: 12 });
@@ -476,7 +469,6 @@
   /* ================= AJÁNDÉKOK ================= */
   const programs = ["szallas", "vacsora", "zene"].sort(() => Math.random() - 0.5);
   const progIcon = { szallas: ["sym-suitcase", "0 0 120 175"], vacsora: ["sym-maki", "0 0 100 90"], zene: ["sym-banjo", "0 0 140 230"] };
-  const progToast = { szallas: "🧳 Szállás Budapesten!", vacsora: "🍣 Korlátlan sushi!", zene: "🪕 Magyar Zene Háza!" };
   const gifts = $$(".gift");
   let opened = 0;
   gifts.forEach((g, i) => {
@@ -489,19 +481,15 @@
     g.appendChild(inside);
     const slot = g.parentElement;
     const tag = $(".gift-tag", slot);
-    const bubble = document.createElement("span");
-    bubble.className = "bubble";
-    slot.appendChild(bubble);
 
     g.addEventListener("click", () => {
-      if (g.classList.contains("open")) { sfx.boing(); say(bubble, pick(["Már ki vagyok bontva! 😄", "Csiki-csiki! 🤭", "Juhé! 🎉"])); return; }
+      if (g.classList.contains("open")) { sfx.boing(); return; }
       // A félénk zöld doboz először elugrik
       if (g.classList.contains("shy") && !g._shyDone && opened < 2) {
         g._shyDone = true;
         g.style.setProperty("--hx", `${-rand(30, 60)}px`);
         g.classList.add("hopaway");
         sfx.slide(false);
-        say(bubble, "Jaj ne, engem a végére! 🙈", 2400);
         setTimeout(() => g.classList.remove("hopaway"), 1300);
         return;
       }
@@ -511,14 +499,13 @@
         tempClass(g, left === 2 ? "shake1" : "shake2", 600);
         sfx.knock();
         tag.textContent = left === 2 ? "Még 2 kopp!" : "Még egyet! 😬";
-        say(bubble, left === 2 ? pick(["Ki az? 👀", "Hé, ez csikiz!", "Kopp-kopp, ki van ott?"]) : pick(["Mindjárt kipukkadok! 😵", "Érzem, jön…!", "Ajjaj, remegek!"]), 1500);
         return;
       }
-      openGift(g, tag, bubble);
+      openGift(g, tag);
     });
   });
 
-  function openGift(g, tag, bubble) {
+  function openGift(g, tag) {
     g.classList.add("open");
     opened++;
     sfx.pop();
@@ -528,7 +515,6 @@
     tag.textContent = "Kibontva! ✔";
     tag.classList.add("done");
     const prog = g.dataset.prog;
-    say(bubble, progToast[prog], 2400);
     const card = $("#" + prog);
     $("#reveals").appendChild(card);
     setTimeout(() => {
@@ -540,11 +526,8 @@
     if (opened === gifts.length) {
       setTimeout(() => {
         rain(160);
-        toast("🎁 Mind a 3 ajándék kibontva! Gratula! 🎉", 3500);
         $("#toFinal").classList.remove("hidden");
       }, 1800);
-    } else {
-      setTimeout(() => toast(`Még ${gifts.length - opened} ajándék vár rád! 🎁`), 2600);
     }
   }
 
@@ -567,8 +550,6 @@
     sfx.boing();
     const [x, y] = centerOf(suitcase);
     for (let i = 0; i < 5; i++) flyEmoji(pick(packing), x, y - 30, i * 70);
-    if (!suitcase._n) toast("Bepakoltunk mindent… még a zoknit is 🧦");
-    suitcase._n = (suitcase._n || 0) + 1;
   });
   function flyEmoji(ch, x, y, delay = 0) {
     setTimeout(() => {
@@ -609,14 +590,11 @@
     if (e.target.classList.contains("win")) {
       e.target.classList.toggle("lit");
       tone(e.target.classList.contains("lit") ? 880 : 440, 0.1, "square", 0.08);
-      if ($$(".win.lit", hotel).length === 12) toast("Minden ablakban buli van! 🪩");
-      if ($$(".win.lit", hotel).length === 0) toast("Mindenki alszik… 😴");
       return;
     }
     hotel.classList.toggle("night");
     const night = hotel.classList.contains("night");
     sfx.slide(!night);
-    toast(night ? "Jó éjszakát, Budapest! 🌙" : "Jó reggelt! Kész a reggeli? ☀️");
     if (night) {
       const [x, y] = centerOf(hotel);
       ["Z", "z", "z"].forEach((z, i) => setTimeout(() => {
@@ -635,10 +613,6 @@
   const belt = $("#belt");
   let beltStarted = false;
   let eaten = 0;
-  const eatQuips = {
-    3: "Ez csak a bemelegítés 🍣", 7: "Hét szerencsés falat! 🍀", 12: "A szakács már izzad 😅",
-    20: "Anya, a futószalag fél tőled! 😂", 30: "Korlátlan… de azért marad a desszertnek is hely? 🍰", 55: "55 sushi az 55. szülinapra! LEGENDA 🏆",
-  };
   // Szunyi, a cica néha felül a futószalagra – ha rábökünk, nyávog és lenullázza a pontokat
   let catOnBelt = false, catSeen = false;
   const sushiSVG = (nig) => nig ? `<svg viewBox="0 0 110 80"><use href="#sym-nigiri"/></svg>` : `<svg viewBox="0 0 100 90"><use href="#sym-maki"/></svg>`;
@@ -699,14 +673,13 @@
         sfx.chomp();
         const n = document.createElement("div");
         n.className = "nyam";
-        n.textContent = pick(["Nyamm!", "Hamm!", "Mmm! 😋", "Csámm!", "Omnom!"]);
+        n.textContent = pick(["Nyimi!", "Nyam!"]);
         n.style.left = e.clientX + "px";
         n.style.top = e.clientY + "px";
         document.body.appendChild(n);
         setTimeout(() => n.remove(), 1000);
         cnt.textContent = `Megevett sushi: ${eaten}`;
         tempClass(cnt, "bump", 500);
-        if (eatQuips[eaten]) toast(eatQuips[eaten], 3000);
         burst(e.clientX, e.clientY, 10, { emoji: ["🍚", "✨", "🥢"], speed: 6 });
         setTimeout(() => b.classList.remove("eaten"), 2200); // korlátlan utánpótlás :)
       });
@@ -757,8 +730,6 @@
   }
   banjo.addEventListener("click", () => {
     [0, 2, 4, 7].forEach((i, j) => setTimeout(() => playKey(i, 0.6), j * 45));
-    if (!banjo._n) toast("Yeee-haw! 🤠🪕");
-    banjo._n = 1;
   });
   // Boldog születésnapot dallam (G-dúr hangolás a 8 billentyűre)
   const song = [
@@ -785,10 +756,10 @@
 
   /* ================= CSALÁD ================= */
   const famLines = {
-    Ivett: ["Isten éltessen, Anya! 💛", "Te vagy a legjobb! 🌟"],
+    Ivett: ["Isten éltessen, Gyöngyi! 💛", "Te vagy a legjobb, Gyöngyi! 🌟"],
     Balázs: ["Boldog szülinapot! 🎉", "Sushi-verseny? Benne vagyok! 🍣"],
     Orsi: ["Nagyon szeretünk! 🧡", "Irány Budapest! 🚋"],
-    "Sebő": ["Tök jó vagy, Anya! 🎃", "55? Nem látszik! 😎"],
+    "Sebő": ["Tök jó vagy, Gyöngyi! 🎃", "55? Nem látszik, Gyöngyi! 😎"],
   };
   $$(".fam").forEach((f) => {
     const b = document.createElement("span");
@@ -870,8 +841,8 @@
     setTimeout(() => sz.classList.remove("out", "peek"), 2300);
     setTimeout(() => (szBusy = false), 3000);
   });
-  setTimeout(catPeek, 8000);
-  setInterval(catPeek, 20000);
+  setTimeout(catPeek, 5000);
+  setInterval(catPeek, 10000);
 
   /* ================= GÖRGETÉSI CSÍK ================= */
   const bar = $(".progress span");
