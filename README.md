@@ -4,7 +4,7 @@ Interaktív, animált szülinapi meglepetés-oldal a „Beige And Orange Waterco
 Megnyitás: `index.html` (bármilyen statikus tárhely, pl. GitHub Pages).
 
 ## Fotók
-Tedd a képeket a `foto/` mappába: `anya.jpg`, `ivett.jpg`, `balazs.jpg`, `orsi.jpg`, `sebo.jpg`.
+Anya fotója már benne van (`foto/anya.webp`). A többieké a `foto/` mappába kerül: `ivett.jpg`, `balazs.jpg`, `orsi.jpg`, `sebo.jpg`.
 
 ## Rejtett poénok
 - Gyertyák elfújása kattintással vagy mikrofonnal 🎤
