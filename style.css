@@ -327,13 +327,31 @@ main{position:relative;z-index:10}
 @keyframes pkb{30%{transform:translateY(-40px) rotate(-10deg) scale(.9,1.1)}60%{transform:scale(1.15,.88)}}
 .pk .bubble{top:-4px;font-size:14px}
 
-/* ---------- Mókus ---------- */
-.squirrel{position:fixed;right:-10px;bottom:90px;width:110px;z-index:75;transform:translateX(130%);transition:transform .6s cubic-bezier(.3,1.5,.5,1)}
-.squirrel svg{width:100%;display:block;overflow:visible}
-.squirrel.peek{transform:translateX(38%) rotate(-12deg)}
-.squirrel.out{transform:translateX(-10%) rotate(0)}
-.squirrel.run{transform:translateX(160%) rotate(20deg);transition-duration:.5s}
-.sq-bubble{left:0;top:0}
+/* ---------- Szunyi, a cica ---------- */
+.szunyi{position:fixed;z-index:75;width:130px;transition:transform .7s cubic-bezier(.3,1.5,.5,1);visibility:hidden}
+.szunyi img{width:100%;display:block;pointer-events:none;filter:drop-shadow(0 6px 10px rgba(60,30,20,.25))}
+.szunyi[data-side]{visibility:visible}
+.szunyi[data-side=bottom]{transform:translateY(110%)}
+.szunyi[data-side=bottom].peek{transform:translateY(45%) rotate(-4deg)}
+.szunyi[data-side=left]{transform:translateX(-110%)}
+.szunyi[data-side=left].peek{transform:translateX(-45%) rotate(6deg)}
+.szunyi[data-side=right]{transform:translateX(110%) rotate(-20deg)}
+.szunyi[data-side=right].peek{transform:translateX(50%) rotate(-25deg)}
+.szunyi.peek.out{transform:none}
+.szunyi.out img{animation:boing .7s cubic-bezier(.3,1.8,.5,1)}
+.szunyi .bubble{top:0}
+.szunyi[data-side=left] .bubble{left:30px;transform:translate(0,-100%) scale(0);transform-origin:0 100%}
+.szunyi[data-side=left] .bubble.show{transform:translate(0,-100%) scale(1)}
+.szunyi[data-side=left] .bubble::after{left:30px}
+.szunyi[data-side=right] .bubble{left:auto;right:30px;transform:translate(0,-100%) scale(0);transform-origin:100% 100%}
+.szunyi[data-side=right] .bubble.show{transform:translate(0,-100%) scale(1)}
+.szunyi[data-side=right] .bubble::after{left:auto;right:30px}
+
+/* Szunyi a futószalagon */
+.sushi.cat{width:auto;bottom:40px}
+.sushi.cat img{height:96px;width:auto;display:block;pointer-events:none;animation:sushiBob .5s ease-in-out infinite alternate;filter:drop-shadow(0 4px 4px rgba(0,0,0,.25))}
+.sushi.gone img,.sushi.gone svg{animation:catJump .8s ease-in forwards}
+@keyframes catJump{30%{transform:translateY(-70px) rotate(-20deg)}100%{transform:translateY(-30px) translateX(60px) rotate(40deg) scale(.2);opacity:0}}
 
 /* ---------- Toast ---------- */
 .toast{
@@ -356,7 +374,7 @@ main{position:relative;z-index:10}
   .summary li:nth-child(2){flex-direction:row;text-align:left}
   .summary b{font-size:15px}.summary span{font-size:13px}
   .bubble{font-size:13px;white-space:normal;width:max-content;max-width:220px}
-  .squirrel{width:84px}
+  .szunyi{max-width:26vw}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}

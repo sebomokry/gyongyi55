@@ -12,4 +12,6 @@ Tedd a képeket a `foto/` mappába: `anya.jpg`, `ivett.jpg`, `balazs.jpg`, `orsi
 - Az „55.” számra kattintva… 😉
 - Menekülő „KATT” gomb, félénk zöld ajándék, 3 koppintásos kibontás
 - Sushi futószalag, zongora + a szülinapi dal, hotel éjszakai mód
-- Levélelkapás, kattintható tökök, felbukkanó mókus
+- Levélelkapás, kattintható tökök
+- Szunyi, a cica néha bekukucskál a képernyő széléről (kattints rá: nyávog!)
+- Szunyi néha a sushi futószalagra is felül – ha rábökünk, nyávog és lenullázza a pontokat 😼
