@@ -77,6 +77,30 @@
     tada: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.5, "triangle", 0.18, i * 0.09)),
     slide: (up = true) => tone(up ? 300 : 900, 0.35, "sine", 0.2, 0, up ? 700 : -650),
     squeak: () => { tone(1400, 0.08, "sine", 0.15, 0, 400); tone(1600, 0.1, "sine", 0.15, 0.1, -300); },
+    meow: () => {
+      if (!soundOn) return;
+      const c = ac();
+      if (!c) return;
+      const t = c.currentTime, d = rand(0.55, 0.8), p = rand(0.9, 1.15);
+      const o = c.createOscillator(), f = c.createBiquadFilter(), g = c.createGain();
+      o.type = "sawtooth";
+      o.frequency.setValueAtTime(420 * p, t);
+      o.frequency.linearRampToValueAtTime(780 * p, t + d * 0.3);
+      o.frequency.linearRampToValueAtTime(560 * p, t + d * 0.7);
+      o.frequency.linearRampToValueAtTime(380 * p, t + d);
+      f.type = "bandpass";
+      f.Q.value = 4;
+      f.frequency.setValueAtTime(900, t);
+      f.frequency.linearRampToValueAtTime(2200, t + d * 0.35);
+      f.frequency.linearRampToValueAtTime(1000, t + d);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.5, t + 0.06);
+      g.gain.setValueAtTime(0.5, t + d * 0.6);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      o.connect(f).connect(g).connect(c.destination);
+      o.start(t);
+      o.stop(t + d + 0.05);
+    },
   };
 
   /* ================= KONFETTI (canvas) ================= */
@@ -615,6 +639,20 @@
     3: "Ez csak a bemelegítés 🍣", 7: "Hét szerencsés falat! 🍀", 12: "A szakács már izzad 😅",
     20: "Anya, a futószalag fél tőled! 😂", 30: "Korlátlan… de azért marad a desszertnek is hely? 🍰", 55: "55 sushi az 55. szülinapra! LEGENDA 🏆",
   };
+  // Szunyi, a cica néha felül a futószalagra – ha rábökünk, nyávog és lenullázza a pontokat
+  let catOnBelt = false, catSeen = false;
+  const sushiSVG = (nig) => nig ? `<svg viewBox="0 0 110 80"><use href="#sym-nigiri"/></svg>` : `<svg viewBox="0 0 100 90"><use href="#sym-maki"/></svg>`;
+  function setRider(b, cat) {
+    b.classList.toggle("cat", cat);
+    b.classList.remove("eaten", "gone");
+    if (cat) {
+      b.innerHTML = `<img src="assets/szunyi${pick([1, 2, 4])}.webp" alt="Szunyi, a cica">`;
+      b.setAttribute("aria-label", "Szunyi, a cica a futószalagon!");
+    } else {
+      b.innerHTML = sushiSVG(b._nig);
+      b.setAttribute("aria-label", "Sushi – kapd el!");
+    }
+  }
   function startBelt() {
     if (beltStarted) return;
     beltStarted = true;
@@ -622,14 +660,40 @@
     for (let i = 0; i < n; i++) {
       const b = document.createElement("button");
       b.className = "sushi";
-      const nig = i % 2 === 1;
-      b.setAttribute("aria-label", "Sushi – kapd el!");
-      b.innerHTML = nig ? `<svg viewBox="0 0 110 80"><use href="#sym-nigiri"/></svg>` : `<svg viewBox="0 0 100 90"><use href="#sym-maki"/></svg>`;
+      b._nig = i % 2 === 1;
+      setRider(b, false);
       const dur = 12;
       b.style.setProperty("--dur", dur + "s");
       b.style.setProperty("--del", `${-(dur / n) * i}s`);
+      b.addEventListener("animationiteration", (e) => {
+        if (e.target !== b || e.animationName !== "ride") return;
+        if (b.classList.contains("cat")) { setRider(b, false); catOnBelt = false; return; }
+        if (!catOnBelt && ((eaten >= 3 && !catSeen) || Math.random() < 0.15)) {
+          setRider(b, true);
+          catOnBelt = catSeen = true;
+        } else if (b.classList.contains("gone")) setRider(b, false);
+      });
       b.addEventListener("click", (e) => {
-        if (b.classList.contains("eaten")) return;
+        if (b.classList.contains("eaten") || b.classList.contains("gone")) return;
+        const cnt = $("#eatCount");
+        if (b.classList.contains("cat")) {
+          b.classList.add("gone");
+          sfx.meow();
+          const lost = eaten;
+          eaten = 0;
+          cnt.textContent = "Megevett sushi: 0";
+          tempClass(cnt, "bump", 500);
+          const m = document.createElement("div");
+          m.className = "nyam";
+          m.textContent = "MIAÚÚÚ! 😾";
+          m.style.left = e.clientX + "px";
+          m.style.top = e.clientY + "px";
+          document.body.appendChild(m);
+          setTimeout(() => m.remove(), 1000);
+          toast(lost ? `Szunyi megette mind a ${lost} sushidat! 🐱 Vissza a nullára!` : "Szunyi nem étel! 😾 (Pontok: 0)", 3200);
+          burst(e.clientX, e.clientY, 18, { emoji: ["🐾", "🐟", "😼"], speed: 8 });
+          return;
+        }
         b.classList.add("eaten");
         eaten++;
         sfx.chomp();
@@ -640,7 +704,6 @@
         n.style.top = e.clientY + "px";
         document.body.appendChild(n);
         setTimeout(() => n.remove(), 1000);
-        const cnt = $("#eatCount");
         cnt.textContent = `Megevett sushi: ${eaten}`;
         tempClass(cnt, "bump", 500);
         if (eatQuips[eaten]) toast(eatQuips[eaten], 3000);
@@ -764,29 +827,51 @@
     pumpkins.appendChild(p);
   }
 
-  /* ================= MÓKUS EASTER EGG ================= */
-  const sq = $("#squirrel");
-  const sqBubble = $(".sq-bubble", sq);
-  let sqBusy = false;
-  function squirrelPeek() {
-    if (sqBusy || document.hidden) return;
-    sq.style.bottom = `${rand(80, innerHeight * 0.55)}px`;
-    sq.classList.add("peek");
-    setTimeout(() => { if (!sqBusy) sq.classList.remove("peek"); }, 3200);
+  /* ================= SZUNYI, A CICA (easter egg) ================= */
+  // pózok: melyik képen melyik szélről kukucskál be
+  const poses = [
+    { img: 1, side: "bottom", w: 130 },
+    { img: 4, side: "bottom", w: 110 },
+    { img: 3, side: "left", w: 140 },
+    { img: 2, side: "right", w: 190 },
+  ];
+  const sz = $("#szunyi");
+  const szImg = $("img", sz);
+  const szBubble = $(".bubble", sz);
+  const catLines = ["Miaú! Boldog szülinapot! 🐾", "Én is jövök Pestre! 🧳🐱", "Hol a sushi?! 🍣😼", "Dorombolás ajándékba: rrrrr 💤", "Simogatást kérek! 🐾", "Miaú = szeretlek macskául 🧡"];
+  let szBusy = false, szPose = null, szTimer = 0;
+  function placeCat(pose) {
+    szPose = pose;
+    szImg.src = `assets/szunyi${pose.img}.webp`;
+    sz.dataset.side = pose.side;
+    sz.style.width = `${pose.w}px`;
+    sz.style.left = sz.style.right = sz.style.top = sz.style.bottom = "";
+    if (pose.side === "bottom") { sz.style.bottom = "0"; sz.style.left = `${rand(8, Math.max(10, 90 - (pose.w / innerWidth) * 100))}vw`; }
+    else if (pose.side === "left") { sz.style.left = "0"; sz.style.top = `${rand(25, 60)}vh`; }
+    else { sz.style.right = "0"; sz.style.top = `${rand(25, 60)}vh`; }
   }
-  sq.addEventListener("click", () => {
-    if (sqBusy) return;
-    sqBusy = true;
-    sq.classList.add("out");
-    sfx.squeak();
-    say(sqBubble, pick(["Boldog szülinapot! 🌰", "Hoztam makkot ajándékba! 🌰", "Psszt… én is jövök Pestre! 🐿️"]), 2000);
-    const [x, y] = centerOf(sq);
-    burst(x, y, 26, { emoji: ["🌰", "🍂", "✨"], speed: 9 });
-    setTimeout(() => { sq.classList.remove("out", "peek"); sq.classList.add("run"); }, 2100);
-    setTimeout(() => { sq.classList.remove("run"); sqBusy = false; }, 2800);
+  function catPeek() {
+    if (szBusy || document.hidden || sz.classList.contains("peek")) return;
+    sz.classList.remove("peek", "out");
+    placeCat(pick(poses));
+    requestAnimationFrame(() => requestAnimationFrame(() => sz.classList.add("peek")));
+    clearTimeout(szTimer);
+    szTimer = setTimeout(() => { if (!szBusy) sz.classList.remove("peek"); }, 3400);
+  }
+  sz.addEventListener("click", () => {
+    if (szBusy) return;
+    szBusy = true;
+    clearTimeout(szTimer);
+    sz.classList.add("out");
+    sfx.meow();
+    say(szBubble, pick(catLines), 2200);
+    const [x, y] = centerOf(sz);
+    burst(x, y, 26, { emoji: ["🐾", "🧡", "🐟", "✨"], speed: 9 });
+    setTimeout(() => sz.classList.remove("out", "peek"), 2300);
+    setTimeout(() => (szBusy = false), 3000);
   });
-  setTimeout(squirrelPeek, 9000);
-  setInterval(squirrelPeek, 24000);
+  setTimeout(catPeek, 8000);
+  setInterval(catPeek, 20000);
 
   /* ================= GÖRGETÉSI CSÍK ================= */
   const bar = $(".progress span");
