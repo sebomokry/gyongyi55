@@ -434,32 +434,25 @@
     loop();
   });
 
-  /* ================= MENEKÜLŐ GOMB ================= */
+  /* ================= „VAJON MI LESZ AZ AJÁNDÉKOD?” GOMB ================= */
+  // Első kattintásra nyílik – de csak ha mindkét gyertya el van fújva.
   const whatGift = $("#whatGift");
-  let runs = 0;
-  const maxRuns = 3;
-  function runAway() {
-    if (runs >= maxRuns) return false;
-    const zone = whatGift.parentElement.getBoundingClientRect();
-    const maxX = Math.min(zone.width / 2 - 140, 260);
-    const x = (Math.random() < 0.5 ? -1 : 1) * rand(80, Math.max(90, maxX));
-    const y = rand(-40, 30);
-    whatGift.style.transform = `translate(${x}px, ${y}px) rotate(${rand(-15, 15)}deg)`;
-    sfx.slide(runs % 2 === 0);
-    runs++;
-    return true;
-  }
-  const isTouch = matchMedia("(hover: none)").matches;
-  if (!isTouch) whatGift.addEventListener("pointerenter", () => { if (runs < maxRuns - 1) runAway(); });
   whatGift.addEventListener("click", () => {
-    if (runs < maxRuns && runAway()) return;
-    whatGift.style.transform = "";
+    if (blown < candles.length) {
+      sfx.squeak();
+      tempClass(whatGift, "nope", 600);
+      tempClass(cake, "notice", 1200);
+      cakeHint.innerHTML = "👉 Előbb fújd el a gyertyákat! 🎂";
+      tempClass(cakeHint, "notice", 1200);
+      cake.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
+      return;
+    }
     sfx.tada();
     const [x, y] = centerOf(whatGift);
     burst(x, y, 90, { speed: 12 });
     unlock($("#gifts"));
     whatGift.disabled = true;
-    whatGift.style.opacity = ".0";
+    whatGift.style.opacity = "0";
     setTimeout(() => (whatGift.parentElement.style.display = "none"), 500);
   });
 
