@@ -310,17 +310,21 @@ main{position:relative;z-index:10}
 .summary span{font-size:15px;opacity:.85}
 @keyframes slideIn{from{opacity:0;transform:translateX(-60px) rotate(-3deg)}to{opacity:1;transform:none}}
 .love{font-size:22px;margin:16px 0 8px;font-weight:600}
-.family{display:flex;gap:clamp(8px,3vw,24px);flex-wrap:wrap;justify-content:center}
+.family{display:flex;gap:clamp(12px,3vw,26px);flex-wrap:wrap;justify-content:center;align-items:flex-end;margin-top:14px}
 .fam{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:800}
 .fam > img,.fam > .ph{width:clamp(70px,16vw,110px);height:clamp(70px,16vw,110px);border-radius:50%;object-fit:cover;
   box-shadow:0 0 0 5px var(--cream),var(--shadow);transition:transform .4s cubic-bezier(.3,1.8,.5,1)}
+/* Fotók: egész alak, mindenkinek a saját képarányához igazított ív alakú keret */
+.family{--fh:clamp(150px,22vw,200px)}
+.fam > img{height:var(--fh);width:calc(var(--fh) * var(--ar,1));object-fit:contain;object-position:50% 100%;
+  border-radius:999px 999px 26px 26px;background:radial-gradient(ellipse at 50% 30%,#fff6ea 0%,#f9dcb8 60%,#f3c08e 100%)}
 .fam > .ph{font-size:34px;font-family:var(--script);position:relative}
 .fam:nth-child(odd) > *:first-child{animation:bob 3s ease-in-out infinite}
 .fam:nth-child(even) > *:first-child{animation:bob 3s 1.5s ease-in-out infinite}
-.fam:hover > *:first-child{transform:rotate(-10deg) scale(1.08)}
+.fam:hover > *:first-child{transform:rotate(-4deg) scale(1.05)}
 .fam.boing > *:first-child{animation:boing .7s cubic-bezier(.3,1.8,.5,1)}
 .fam .bubble{font-size:13px}
-.signature{font-family:var(--script);font-size:clamp(28px,5vw,44px);margin:20px 0 0;text-align:center;clip-path:inset(0 100% 0 0)}
+.signature{font-family:var(--script);padding:0 .35em;font-size:clamp(28px,5vw,44px);margin:20px 0 0;text-align:center;clip-path:inset(0 100% 0 0)}
 .signature.write{animation:write 2.6s .6s ease-in-out forwards}
 @keyframes write{to{clip-path:inset(0 0 0 0)}}
 
