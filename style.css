@@ -94,12 +94,12 @@ main{position:relative;z-index:10}
 .hero-row{display:flex;align-items:center;justify-content:center;gap:clamp(10px,5vw,70px);flex-wrap:wrap;margin:10px 0 20px}
 
 /* Anya */
-.mom-wrap{position:relative;width:clamp(230px,34vw,320px);aspect-ratio:1;display:grid;place-items:center}
-.wreath{position:absolute;inset:-6%;width:112%;height:112%;object-fit:contain;animation:wreathSpin 60s linear infinite;pointer-events:none}
+.mom-wrap{--mw:clamp(250px,36vw,340px);position:relative;width:var(--mw);height:var(--mw);animation:bob 3.2s ease-in-out infinite}
+.wreath{position:absolute;left:0;top:0;width:100%;height:100%;animation:wreathSpin 60s linear infinite;pointer-events:none}
 @keyframes wreathSpin{to{transform:rotate(360deg)}}
 .mom{
-  position:relative;width:64%;aspect-ratio:1;border-radius:50%;
-  box-shadow:0 0 0 6px var(--cream),var(--shadow);animation:bob 3.2s ease-in-out infinite;
+  position:absolute;left:22%;top:22%;width:56%;height:56%;border-radius:50%;
+  box-shadow:0 0 0 5px var(--cream),var(--shadow);
 }
 .mom > img{background:radial-gradient(circle at 50% 35%,#fff6ea,#f3c89a)}
 .mom > img,.mom > .ph{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
@@ -197,7 +197,7 @@ main{position:relative;z-index:10}
 .gift.open .inside{transform:translate(-50%,-10%) scale(1);animation:insideBob 2s 1.2s ease-in-out infinite}
 @keyframes insideBob{50%{translate:0 -10px;rotate:4deg}}
 .gift.hopaway{translate:var(--hx,0) 0}
-.gift-tag{margin-top:6px;font-weight:900;font-size:clamp(12px,1.6vw,15px);background:var(--cream);padding:4px 12px;border-radius:99px;box-shadow:var(--shadow);transition:.3s}
+.gift-tag{margin-top:6px;font-weight:900;font-size:clamp(10px,3vw,15px);white-space:nowrap;background:var(--cream);padding:4px clamp(7px,2vw,12px);border-radius:99px;box-shadow:var(--shadow);transition:.3s}
 .gift-tag.done{background:#fff;color:#2b8a3e}
 .gift-slot .bubble{top:-10px}
 
@@ -227,8 +227,8 @@ main{position:relative;z-index:10}
 .card-art{display:flex;justify-content:center;align-items:flex-end;gap:clamp(10px,5vw,50px);min-height:220px;position:relative}
 .suitcase{width:clamp(95px,15vw,130px);animation:walk 1.4s ease-in-out infinite;transform-origin:50% 100%}
 @keyframes walk{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg) translateY(-6px)}}
-.suitcase.jump{animation:sJump .8s cubic-bezier(.3,1.6,.5,1)}
-@keyframes sJump{30%{transform:translateY(-60px) rotate(-15deg) scale(1.08)}60%{transform:translateY(0) scale(1.1,.9)}}
+.suitcase.jump{animation:sJump .9s ease-out}
+@keyframes sJump{0%{transform:none}35%{transform:translateY(-90px) rotate(-18deg) scale(1.12)}65%{transform:translateY(0) scale(1.15,.85)}82%{transform:translateY(-14px) scale(.96,1.05)}100%{transform:none}}
 .flyer{position:fixed;z-index:65;font-size:34px;pointer-events:none;will-change:transform}
 
 .hotel{width:clamp(140px,22vw,190px);border-radius:16px;padding:6px;background:#bfe3ff;transition:background .6s}
@@ -256,11 +256,11 @@ main{position:relative;z-index:10}
 }
 @keyframes rail{to{background-position:44px 0}}
 .sushi{
-  position:absolute;bottom:38px;width:92px;left:-120px;animation:ride var(--dur,11s) linear infinite;animation-delay:var(--del,0s);z-index:2;
+  position:absolute;bottom:38px;left:0;width:92px;z-index:2;will-change:transform;transform:translate3d(-200px,0,0);touch-action:manipulation;
 }
-.sushi svg{width:100%;display:block;overflow:visible;animation:sushiBob .5s ease-in-out infinite alternate;animation-delay:inherit}
+.sushi svg{width:100%;display:block;overflow:visible;animation:sushiBob .5s ease-in-out infinite alternate}
+.sushi:nth-child(odd) svg,.sushi:nth-child(odd) img{animation-delay:-.25s}
 .sushi.eaten svg{animation:chomp .5s forwards}
-@keyframes ride{from{left:-120px}to{left:calc(100% + 20px)}}
 @keyframes sushiBob{to{transform:translateY(-6px) rotate(3deg)}}
 @keyframes chomp{0%{transform:scale(1)}30%{transform:scale(1.3) rotate(-10deg);clip-path:circle(60% at 50% 50%)}100%{transform:scale(0) rotate(40deg);opacity:0}}
 .nyam{position:fixed;z-index:66;font-weight:900;font-size:24px;color:#d7263d;pointer-events:none;animation:nyam 1s ease-out forwards;text-shadow:0 2px 0 #fff}
@@ -349,8 +349,9 @@ main{position:relative;z-index:10}
 .szunyi[data-side=right] .bubble::after{left:auto;right:30px}
 
 /* Szunyi a futószalagon */
-.sushi.cat{width:auto;bottom:40px}
-.sushi.cat img{height:96px;width:auto;display:block;pointer-events:none;animation:sushiBob .5s ease-in-out infinite alternate;filter:drop-shadow(0 4px 4px rgba(0,0,0,.25))}
+.sushi.cat{bottom:40px}
+.sushi.cat img{position:relative;left:50%;translate:-50% 0}
+.sushi.cat img{height:clamp(76px,20vw,96px);width:auto;display:block;pointer-events:none;animation:sushiBob .5s ease-in-out infinite alternate;filter:drop-shadow(0 4px 4px rgba(0,0,0,.25))}
 .sushi.gone img,.sushi.gone svg{animation:catJump .8s ease-in forwards}
 @keyframes catJump{30%{transform:translateY(-70px) rotate(-20deg)}100%{transform:translateY(-30px) translateX(60px) rotate(40deg) scale(.2);opacity:0}}
 
@@ -379,7 +380,6 @@ main{position:relative;z-index:10}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
-  .sushi{animation:ride 30s linear infinite!important}
   .signature{clip-path:none}
   .summary li{opacity:1}
 }

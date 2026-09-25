@@ -143,16 +143,21 @@
       setTimeout(() => burst(rand(0, innerWidth), -20, 1, { angle: Math.PI / 2, spread: 0.6, speed: 4, leaves: 0.3 }), i * 18);
     }
   }
-  function tick() {
+  let lastTick = 0;
+  function tick(now) {
+    // k = eltelt idő 60 fps-es képkockákban mérve (iPhone 120 Hz-en ~0.5, energiatakarékos 30 Hz-en ~2)
+    const k = lastTick ? Math.min(3, (now - lastTick) / 16.67) : 1;
+    lastTick = now;
     cx.clearRect(0, 0, innerWidth, innerHeight);
     parts = parts.filter((p) => p.age < p.life && p.y < innerHeight + 60);
     for (const p of parts) {
-      p.age++;
-      p.vx *= p.drag;
-      p.vy = p.vy * p.drag + p.g;
-      p.x += p.vx + Math.sin((p.age + p.wob * 10) / 10) * 0.6;
-      p.y += p.vy;
-      p.rot += p.vr;
+      p.age += k;
+      const dr = Math.pow(p.drag, k);
+      p.vx *= dr;
+      p.vy = p.vy * dr + p.g * k;
+      p.x += (p.vx + Math.sin((p.age + p.wob * 10) / 10) * 0.6) * k;
+      p.y += p.vy * k;
+      p.rot += p.vr * k;
       const alpha = Math.min(1, (p.life - p.age) / 25);
       cx.save();
       cx.globalAlpha = alpha;
@@ -168,7 +173,7 @@
       cx.restore();
     }
     raf = parts.length ? requestAnimationFrame(tick) : 0;
-    if (!raf) cx.clearRect(0, 0, innerWidth, innerHeight);
+    if (!raf) { cx.clearRect(0, 0, innerWidth, innerHeight); lastTick = 0; }
   }
   const centerOf = (el) => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
 
@@ -557,21 +562,23 @@
       e.className = "flyer";
       e.textContent = ch;
       document.body.appendChild(e);
-      const vx = rand(-7, 7), vy0 = rand(-15, -10);
-      let vy = vy0, cxx = x - 17, cyy = y - 17, rot = 0, t = 0;
+      const vx = rand(-7, 7);
+      let vy = rand(-17, -12), cxx = x - 17, cyy = y - 17, rot = 0, t = 0, last = 0;
       const vr = rand(-12, 12);
-      const step = () => {
-        t++;
-        vy += 0.55;
-        cxx += vx;
-        cyy += vy;
-        rot += vr;
+      const step = (now) => {
+        const k = last ? Math.min(3, (now - last) / 16.67) : 1;
+        last = now;
+        t += k;
+        vy += 0.55 * k;
+        cxx += vx * k;
+        cyy += vy * k;
+        rot += vr * k;
         e.style.transform = `translate(${cxx}px, ${cyy}px) rotate(${rot}deg)`;
-        e.style.opacity = Math.min(1, (70 - t) / 20);
-        if (t < 70) requestAnimationFrame(step);
+        e.style.opacity = Math.min(1, (75 - t) / 20);
+        if (t < 75) requestAnimationFrame(step);
         else e.remove();
       };
-      step();
+      requestAnimationFrame(step);
     }, delay);
   }
   const hotel = $("#hotel");
@@ -627,26 +634,54 @@
       b.setAttribute("aria-label", "Sushi – kapd el!");
     }
   }
+  // A futószalagot JS mozgatja (nem CSS): így minden eszközön egyforma sebességű,
+  // a sushik egyenlő távolságra jönnek egymás után, és keskeny kijelzőn sem csúsznak egymásra.
+  const riders = [];
+  let beltW = 0, beltLoop = 0, beltPos = 0, beltLast = 0;
+  const BELT_SPEED = 85; // px / másodperc
+  function riderSize() { return innerWidth < 560 ? 72 : 92; }
+  function layoutBelt() {
+    beltW = belt.clientWidth;
+    const size = riderSize(), gap = size * (innerWidth < 560 ? 0.55 : 0.9);
+    const want = Math.max(3, Math.round((beltW + size) / (size + gap)));
+    while (riders.length < want) riders.push(makeRider(riders.length));
+    while (riders.length > want) riders.pop().remove();
+    beltLoop = riders.length * (size + gap);
+    riders.forEach((r) => (r.style.width = size + "px"));
+  }
+  function beltStep(now) {
+    const dt = beltLast ? Math.min(0.1, (now - beltLast) / 1000) : 0;
+    beltLast = now;
+    if (!document.hidden) beltPos = (beltPos + BELT_SPEED * dt) % beltLoop;
+    const size = riderSize(), step = beltLoop / riders.length;
+    riders.forEach((r, i) => {
+      const x = ((beltPos + i * step) % beltLoop) - size;
+      if (r._x !== undefined && x < r._x) newLap(r); // körbeért: új menet a bal szélről
+      r._x = x;
+      r.style.transform = `translate3d(${x}px,0,0)`;
+    });
+    requestAnimationFrame(beltStep);
+  }
+  function newLap(b) {
+    if (b.classList.contains("cat")) { setRider(b, false); catOnBelt = false; return; }
+    if (!catOnBelt && ((eaten >= 3 && !catSeen) || Math.random() < 0.15)) {
+      setRider(b, true);
+      catOnBelt = catSeen = true;
+    } else if (b.classList.contains("gone") || b.classList.contains("eaten")) setRider(b, false);
+  }
   function startBelt() {
     if (beltStarted) return;
     beltStarted = true;
-    const n = 6;
-    for (let i = 0; i < n; i++) {
+    layoutBelt();
+    addEventListener("resize", layoutBelt);
+    requestAnimationFrame(beltStep);
+  }
+  function makeRider(i) {
+    {
       const b = document.createElement("button");
       b.className = "sushi";
       b._nig = i % 2 === 1;
       setRider(b, false);
-      const dur = 12;
-      b.style.setProperty("--dur", dur + "s");
-      b.style.setProperty("--del", `${-(dur / n) * i}s`);
-      b.addEventListener("animationiteration", (e) => {
-        if (e.target !== b || e.animationName !== "ride") return;
-        if (b.classList.contains("cat")) { setRider(b, false); catOnBelt = false; return; }
-        if (!catOnBelt && ((eaten >= 3 && !catSeen) || Math.random() < 0.15)) {
-          setRider(b, true);
-          catOnBelt = catSeen = true;
-        } else if (b.classList.contains("gone")) setRider(b, false);
-      });
       b.addEventListener("click", (e) => {
         if (b.classList.contains("eaten") || b.classList.contains("gone")) return;
         const cnt = $("#eatCount");
@@ -684,6 +719,7 @@
         setTimeout(() => b.classList.remove("eaten"), 2200); // korlátlan utánpótlás :)
       });
       belt.appendChild(b);
+      return b;
     }
   }
 
