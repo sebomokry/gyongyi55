@@ -543,12 +543,40 @@
   /* ================= SZÁLLÁS: bőrönd + hotel ================= */
   const packing = ["👗", "🩴", "🪥", "🧸", "🛁", "😴", "🥂", "📸", "👒", "🧦"];
   const suitcase = $("#suitcase");
-  suitcase.addEventListener("click", () => {
-    tempClass(suitcase, "jump", 800);
-    sfx.boing();
-    const [x, y] = centerOf(suitcase);
-    for (let i = 0; i < 5; i++) flyEmoji(pick(packing), x, y - 30, i * 70);
+  // Trükkös bőrönd: megrázkódik, résnyire kinyílik, visszacsapódik… aztán kipattan, és ott a családi fotó
+  let caseBusy = false;
+  const lightbox = $("#lightbox");
+  suitcase.addEventListener("click", (e) => {
+    if (caseBusy) return;
+    if (suitcase.classList.contains("open")) {
+      if (e.target.closest(".case-inside")) {
+        lightbox.hidden = false;
+        sfx.pop();
+        return;
+      }
+      suitcase.classList.remove("open");
+      tempClass(suitcase, "slam", 500);
+      sfx.knock();
+      return;
+    }
+    caseBusy = true;
+    tempClass(suitcase, "wobble", 450);
+    sfx.knock();
+    setTimeout(() => { suitcase.classList.add("peek"); tone(700, 0.12, "sine", 0.15, 0, 300); }, 420);
+    setTimeout(() => { suitcase.classList.remove("peek"); tempClass(suitcase, "slam", 500); sfx.knock(); }, 800);
+    setTimeout(() => {
+      suitcase.classList.add("open");
+      sfx.boing();
+      setTimeout(sfx.tada, 200);
+      const [x, y] = centerOf(suitcase);
+      burst(x, y, 50, { emoji: ["💛", "🧡", "✨", "💐"], speed: 10 });
+      for (let i = 0; i < 4; i++) flyEmoji(pick(packing), x, y - 20, 250 + i * 80);
+      caseBusy = false;
+    }, 1250);
   });
+  const closeLightbox = () => { lightbox.hidden = true; };
+  lightbox.addEventListener("click", closeLightbox);
+  addEventListener("keydown", (e) => { if (e.key === "Escape") closeLightbox(); });
   function flyEmoji(ch, x, y, delay = 0) {
     setTimeout(() => {
       const e = document.createElement("div");

@@ -236,6 +236,36 @@ main{position:relative;z-index:10}
 @keyframes walk{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg) translateY(-6px)}}
 .suitcase.jump{animation:sJump .9s ease-out}
 @keyframes sJump{0%{transform:none}35%{transform:translateY(-90px) rotate(-18deg) scale(1.12)}65%{transform:translateY(0) scale(1.15,.85)}82%{transform:translateY(-14px) scale(.96,1.05)}100%{transform:none}}
+/* Nyitható bőrönd */
+.suitcase{position:relative;aspect-ratio:120/175;transition:width .6s cubic-bezier(.3,1.5,.5,1)}
+.suitcase > .case-back{position:absolute;inset:0;width:100%;height:100%}
+.case-inside,.case-lid{position:absolute;left:11.67%;top:21.71%;width:76.67%;height:66.29%}
+.case-inside{border-radius:14%/11%;overflow:hidden;padding:5%;background:#8e4a45}
+.case-inside img{width:100%;height:100%;object-fit:cover;border-radius:10%/8%;display:block;box-shadow:inset 0 0 0 2px #fff;cursor:zoom-in}
+.case-inside .glint{position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.65) 50%,transparent 65%);transform:translateX(-120%);pointer-events:none}
+.suitcase.open .glint{animation:glint 1.2s .9s ease-in-out}
+@keyframes glint{to{transform:translateX(120%)}}
+.case-lid{transform-origin:0 50%;transform-style:preserve-3d;transform:perspective(700px) rotateY(0);transition:transform .7s cubic-bezier(.3,1.4,.5,1)}
+.case-lid .lid-front{position:absolute;inset:-2%;width:104%;height:104%;overflow:visible;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.case-lid .lid-back{position:absolute;inset:0;border-radius:16%/12%;border:3px solid #4a2521;transform:rotateY(180deg);backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  background:repeating-linear-gradient(45deg,#f6c7c0 0 8px,#efb3aa 8px 16px)}
+.suitcase.peek .case-lid{transform:perspective(700px) rotateY(-38deg);transition-duration:.25s}
+.suitcase.open .case-lid{transform:perspective(500px) rotateY(-112deg);transition-duration:.9s}
+.suitcase{margin-left:0;transition:width .6s cubic-bezier(.3,1.5,.5,1),margin .6s cubic-bezier(.3,1.5,.5,1)}
+.suitcase.open{width:clamp(150px,38vw,230px);margin-left:clamp(18px,4vw,40px);animation:none}
+.suitcase.wobble{animation:caseWobble .45s ease-in-out}
+@keyframes caseWobble{20%{transform:rotate(-9deg) scale(1.05)}45%{transform:rotate(8deg) scale(1.08)}70%{transform:rotate(-5deg)}100%{transform:none}}
+.suitcase.slam{animation:caseSlam .5s cubic-bezier(.3,1.8,.5,1)}
+@keyframes caseSlam{30%{transform:scale(1.12,.88)}60%{transform:scale(.95,1.06)}100%{transform:none}}
+.card-art{flex-wrap:nowrap}
+
+.lightbox{position:fixed;inset:0;z-index:95;display:grid;place-items:center;background:rgba(40,16,10,.82);padding:16px;cursor:zoom-out;animation:lbIn .35s ease-out}
+.lightbox[hidden]{display:none}
+.lightbox img{max-width:100%;max-height:calc(100svh - 40px);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.5);border:6px solid #fff6ea;animation:lbImg .6s cubic-bezier(.3,1.5,.5,1)}
+.lb-close{position:absolute;top:14px;right:14px;width:44px;height:44px;border-radius:50%;background:#fff6ea;font-size:20px;font-weight:900}
+@keyframes lbIn{from{opacity:0}}
+@keyframes lbImg{from{transform:scale(.3) rotate(-10deg);opacity:0}}
+
 .flyer{position:fixed;z-index:65;font-size:34px;pointer-events:none;will-change:transform}
 
 .hotel{width:clamp(140px,22vw,190px);border-radius:16px;padding:6px;background:#bfe3ff;transition:background .6s}
